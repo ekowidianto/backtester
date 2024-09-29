@@ -1,7 +1,8 @@
 import pandas as pd
 import yfinance as yf
 
-def extract_data(stocks, start, end):
+
+def get_data(stocks, start, end):
     def data(stock):
         return yf.download(stock, start=start, end=end)
 

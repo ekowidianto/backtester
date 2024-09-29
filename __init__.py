@@ -1,7 +1,7 @@
 import indicators
 import performance
-import strategy
-import utils
 import visualisation
+from signals import Signals
+from utils import get_data
 
-__all__ = ["utils", "strategy", "performance", "indicators", "visualisation"]
+__all__ = ["indicators", "visualisation", "performance", "Signals", "get_data"]
