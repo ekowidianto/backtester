@@ -7,7 +7,7 @@ def compute_sma(df: pd.DataFrame, period: int) -> pd.DataFrame:
 
 
 def compute_ema(df: pd.DataFrame, period: int) -> pd.DataFrame:
-    df_ema = df.ewm(span=period, adjust=False).mean()
+    df_ema = df.ewm(span=period).mean()
     return df_ema
 
 

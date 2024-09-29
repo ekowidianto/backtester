@@ -47,6 +47,7 @@ class Indicator_MACD(Indicator):
         self.price_data["trading_positions"] = (
             self.price_data["buy_or_sell"].ffill().fillna(0)
         )
+        self.price_data["buy_or_sell"] = self.price_data["buy_or_sell"].fillna(0)
 
     def _compute_buy_or_sell(self):
         buy_signal = crossed_above(

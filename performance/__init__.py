@@ -1,3 +1,3 @@
-from .base import Performance
+from .base import Performance, PerformanceCustom
 
-__all__ = ["Performance"]
+__all__ = ["Performance", "PerformanceCustom"]
