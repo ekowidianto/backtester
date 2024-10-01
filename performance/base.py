@@ -13,16 +13,16 @@ class PerformanceCustom:
 
     def compute_n_largest_drawdowns(self, n: int = 5):
         df_drawdown = self.cumulative_returns.copy()
-        df_drawdown["watermark"] = df_drawdown["Cumulative Returns"].cummax()
+        df_drawdown["Watermark"] = df_drawdown["Cumulative Returns"].cummax()
         df_drawdown["drawdown"] = (
-            df_drawdown["watermark"] - df_drawdown["Cumulative Returns"]
+            df_drawdown["Watermark"] - df_drawdown["Cumulative Returns"]
         )
 
         breakpoints = df_drawdown["drawdown"].loc[df_drawdown["drawdown"] == 0].index
 
         if (
             df_drawdown["Cumulative Returns"].iloc[-1]
-            < df_drawdown["watermark"].iloc[-1]
+            < df_drawdown["Watermark"].iloc[-1]
         ):
             breakpoints = breakpoints.append(df_drawdown.tail(1).index)
 
@@ -58,22 +58,28 @@ class PerformanceCustom:
     ):
         _, ax = plt.subplots(1, figsize=(16, 10))
         df_drawdown[["Cumulative Returns"]].plot(color="green", ax=ax)
-        df_drawdown[["watermark"]].plot(color="blue", ls="--", ax=ax, label="Watermark")
+        df_drawdown[["Watermark"]].plot(color="blue", ls="--", ax=ax, label="Watermark")
 
         for i in range(n):
             start = df_n_drawdowns.iloc[i]["start_date"]
             end = df_n_drawdowns.iloc[i]["end_date"] + dt.timedelta(days=1)
             days = df_n_drawdowns.iloc[i]["drawdown_period"].days
 
-            df_drawdown.loc[start:end]["watermark"].plot(
+            df_drawdown.loc[start:end]["Watermark"].plot(
                 ax=ax, label=f"Drawdown period = {days} days"
             )
 
         ax.legend()
         plt.show()
 
-    def compute_sharpe_ratio(self) -> float:
-        daily_return = self.cumulative_returns["Cumulative Returns"].pct_change()
+    def compute_sharpe_ratio(
+        self, method: Literal["log", "pct_chg"] = "pct_chg"
+    ) -> float:
+        pct_chg_daily_return = self.cumulative_returns[
+            "Cumulative Returns"
+        ].pct_change()
+        log_daily_return = np.log(pct_chg_daily_return + 1)
+        daily_return = pct_chg_daily_return if method == "pct_chg" else log_daily_return
         avg_daily_return = daily_return.mean()
         std_daily_return = daily_return.std()
         sharpe_ratio = np.sqrt(252) * avg_daily_return / std_daily_return
@@ -93,6 +99,14 @@ class PerformanceCustom:
             )
             annual_returns.append(val * 100)
         return pd.DataFrame({"Year": unique_years, "Annual Return (%)": annual_returns})
+
+    def compute_cagr(self) -> float:
+        cumulative_returns = self.cumulative_returns["Cumulative Returns"]
+        days = (cumulative_returns.index[-1] - cumulative_returns.index[0]).days
+        cagr = (cumulative_returns.iloc[-1] / cumulative_returns.iloc[0]) ** (
+            365.0 / days
+        ) - 1
+        return cagr
 
 
 class Performance:

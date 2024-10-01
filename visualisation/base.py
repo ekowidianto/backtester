@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
-def plot_buy_sell(symbol, df_prices):
+def plot_buy_sell(symbol, df_prices: pd.DataFrame):
     df_prices = df_prices.reset_index()
     fig = plt.figure(figsize=[16, 12])
 
@@ -40,13 +41,13 @@ def plot_buy_sell(symbol, df_prices):
         label="Sell",
     )
     sub.legend()
-    return fig
+    return fig, sub
 
 
-def plot_macd_buy_sell(symbol, df_prices):
+def plot_macd_buy_sell(symbol, df_prices: pd.DataFrame):
     df_prices = df_prices.reset_index()
 
-    fig = plot_buy_sell(symbol, df_prices)
+    fig, _ = plot_buy_sell(symbol, df_prices)
     sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"MACD")
     sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
     sub.plot(df_prices["Date"], df_prices["MACD"], linewidth=0.75, label="MACD")
@@ -55,5 +56,65 @@ def plot_macd_buy_sell(symbol, df_prices):
         df_prices["MACD Signal Line"],
         linewidth=0.75,
         label="Signal Line",
+    )
+    sub.legend()
+
+
+def plot_ma_crossover_buy_sell(symbol, df_prices):
+    df_prices = df_prices.reset_index()
+
+    fig, sub = plot_buy_sell(symbol, df_prices)
+
+    sub.plot(
+        df_prices["Date"],
+        df_prices["SMA_short"],
+        color="blue",
+        ls="--",
+        label="SMA Short",
+    )
+    sub.plot(
+        df_prices["Date"],
+        df_prices["SMA_long"],
+        color="green",
+        ls="--",
+        label="SMA Long",
+    )
+    sub.legend()
+
+    sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"Trading Position")
+    sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
+    sub.plot(
+        df_prices["Date"],
+        df_prices["trading_positions"],
+        color="red",
+        label="Trading Positions",
+    )
+    sub.legend()
+
+
+def plot_sma_mean_reversion_buy_sell(symbol, df_prices: pd.DataFrame, threshold: float):
+    df_prices = df_prices.reset_index()
+
+    fig, sub = plot_buy_sell(symbol, df_prices)
+
+    sub.plot(df_prices["Date"], df_prices["SMA"], color="blue", ls="--", label="SMA")
+    sub.legend()
+
+    sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"Price - SMA Diff")
+    sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
+
+    sub.axhline(0, color="k", linestyle="--")
+    sub.axhline(
+        threshold,
+        color="g",
+        linestyle="--",
+        label="Threshold",
+    )
+    sub.axhline(-threshold, color="g", linestyle="--")
+    sub.plot(
+        df_prices["Date"],
+        df_prices["SMA_Price_Diff"],
+        color="red",
+        label="Price - SMA Diff",
     )
     sub.legend()

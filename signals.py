@@ -2,13 +2,20 @@ from datetime import datetime, timedelta
 from typing import Literal
 
 import pandas as pd
-
-from indicators import Indicator_MACD
+from indicators import (
+    Indicator_MA_Crossover,
+    Indicator_MACD,
+    Indicator_SMA_Mean_Reversion,
+)
 from utils import get_data
 
 
 class Signals:
-    IndicatorMap = {"MACD": Indicator_MACD}
+    IndicatorMap = {
+        "MACD": Indicator_MACD,
+        "MA_crossover": Indicator_MA_Crossover,
+        "SMA_mean_reversion": Indicator_SMA_Mean_Reversion,
+    }
 
     def __init__(self, symbol: str, sd: datetime, ed: datetime, lookback: int = 0):
         self.symbol = symbol
@@ -31,7 +38,9 @@ class Signals:
         return all_data
 
     def run_indicator_for(
-        self, indicator: Literal["MACD"], **indicator_params
+        self,
+        indicator: Literal["MACD", "MA_Crossover", "SMA_mean_reversion"],
+        **indicator_params
     ) -> pd.DataFrame:
         indicator = self.IndicatorMap[indicator](
             self.symbol, self.data, **indicator_params

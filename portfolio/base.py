@@ -68,7 +68,7 @@ class Portfolio:
         }
         return pd.DataFrame(cumret_dict)
 
-    def plot_returns(self):
+    def plot_returns(self, with_fee: bool = True):
         df_portfolio = self.df_portfolio.reset_index()
         fig = plt.figure(figsize=[16, 12])
 
@@ -82,12 +82,18 @@ class Portfolio:
             label="Passive",
         )
 
+        strat_cum_ret = (
+            df_portfolio["strategy_cum_net_returns"]
+            if with_fee
+            else df_portfolio["strategy_cum_returns"]
+        )
+        strat_label = "Strategy Return with Fee" if with_fee else "Strategy Return"
         sub.plot(
             df_portfolio["Date"],
-            df_portfolio["strategy_cum_net_returns"],
+            strat_cum_ret,
             color="blue",
             linewidth=0.75,
-            label="Strategy Return with Fee",
+            label=strat_label,
         )
         sub.legend()
 

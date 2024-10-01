@@ -8,7 +8,7 @@ class Indicator(ABC):
         self.price_data = price_data.copy(deep=True)
 
     def get_price_data(self) -> pd.DataFrame:
-        return self.price_data.copy(deep=True)
+        return self.price_data.copy(deep=True).dropna()
 
     @abstractmethod
     def run(self) -> pd.DataFrame:
