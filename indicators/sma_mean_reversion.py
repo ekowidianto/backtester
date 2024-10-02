@@ -1,3 +1,5 @@
+from typing import Literal
+
 import numpy as np
 import pandas as pd
 
@@ -13,13 +15,14 @@ class Indicator_SMA_Mean_Reversion(Indicator):
         symbol: str,
         price_data: pd.DataFrame,
         sma_period: int = 41,
-        threshold: int = 4,
+        threshold_method: Literal["constant", "stdev"] = "constant",
+        threshold_multiplier: float = 4.0,
     ):
         super().__init__(price_data)
         self.symbol = symbol
         self.price_data = price_data
         self.sma_period = sma_period
-        self.threshold = threshold
+        self.threshold = self._compute_threshold(threshold_method, threshold_multiplier)
 
     def run(self):
         self._compute_internal_workings()
@@ -27,9 +30,22 @@ class Indicator_SMA_Mean_Reversion(Indicator):
         self._compute_buy_or_sell()
 
     def plot(self):
-        plot_sma_mean_reversion_buy_sell(
-            self.symbol, self.get_price_data(), self.threshold
-        )
+        plot_sma_mean_reversion_buy_sell(self.symbol, self.get_price_data())
+
+    def _compute_threshold(
+        self,
+        threshold_method: Literal["constant", "stdev"],
+        threshold_multiplier: float,
+    ) -> pd.Series | float:
+        result = None
+        if threshold_method == "constant":
+            result = threshold_multiplier
+        elif threshold_method == "stdev":
+            result = (
+                threshold_multiplier
+                * self.price_data["Adj Close"].rolling(window=self.sma_period).std()
+            )
+        return result
 
     def _compute_internal_workings(self):
         adj_close_price = self.price_data[["Adj Close"]]
@@ -42,15 +58,18 @@ class Indicator_SMA_Mean_Reversion(Indicator):
         )
 
     def _compute_trading_positions(self):
+        self.price_data["Upper_Threshold"] = self.threshold
+        self.price_data["Lower_Threshold"] = -self.threshold
+
         self.price_data["trading_positions"] = np.where(
-            self.price_data["SMA_Price_Diff"] > self.threshold,
+            self.price_data["SMA_Price_Diff"] > self.price_data["Upper_Threshold"],
             -1,
             np.nan,  # overbought --> sell (short)
         )
 
         self.price_data["trading_positions"] = np.where(
             self.price_data["SMA_Price_Diff"]
-            < -self.threshold,  # oversold --> buy (long)
+            < self.price_data["Lower_Threshold"],  # oversold --> buy (long)
             1,
             self.price_data["trading_positions"],
         )

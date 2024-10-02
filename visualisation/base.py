@@ -92,7 +92,7 @@ def plot_ma_crossover_buy_sell(symbol, df_prices):
     sub.legend()
 
 
-def plot_sma_mean_reversion_buy_sell(symbol, df_prices: pd.DataFrame, threshold: float):
+def plot_sma_mean_reversion_buy_sell(symbol, df_prices: pd.DataFrame):
     df_prices = df_prices.reset_index()
 
     fig, sub = plot_buy_sell(symbol, df_prices)
@@ -104,13 +104,14 @@ def plot_sma_mean_reversion_buy_sell(symbol, df_prices: pd.DataFrame, threshold:
     sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
 
     sub.axhline(0, color="k", linestyle="--")
-    sub.axhline(
-        threshold,
+    sub.plot(
+        df_prices["Date"],
+        df_prices["Upper_Threshold"],
         color="g",
         linestyle="--",
         label="Threshold",
     )
-    sub.axhline(-threshold, color="g", linestyle="--")
+    sub.plot(df_prices["Date"], df_prices["Lower_Threshold"], color="g", linestyle="--")
     sub.plot(
         df_prices["Date"],
         df_prices["SMA_Price_Diff"],

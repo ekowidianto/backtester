@@ -23,6 +23,9 @@ class Portfolio:
     def get_portfolio(self) -> pd.DataFrame:
         return self.df_portfolio
 
+    def get_final_capital(self) -> float:
+        return np.around(self.get_portfolio()["capital"].iloc[-1], 2)
+
     def init_portfolio(self):
         df_portfolio = self.df_prices[
             ["Date", "Adj Close", "buy_or_sell", "trading_positions"]
