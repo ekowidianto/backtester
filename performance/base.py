@@ -7,11 +7,12 @@ import pandas as pd
 
 
 class PerformanceCustom:
-    def __init__(self, cum_returns: pd.DataFrame):
+    def __init__(self, cum_returns: pd.DataFrame, symbol: str):
+        self.symbol = symbol
         self.cumulative_returns = cum_returns
         self.cumulative_returns.set_index("Date", inplace=True)
 
-    def compute_n_largest_drawdowns(self, n: int = 5):
+    def compute_n_largest_drawdowns(self, n: int = 5, is_plot: bool = False):
         df_drawdown = self.cumulative_returns.copy()
         df_drawdown["Watermark"] = df_drawdown["Cumulative Returns"].cummax()
         df_drawdown["drawdown"] = (
@@ -50,13 +51,27 @@ class PerformanceCustom:
             .reset_index(drop=True)
             .iloc[:n]
         )
-        self._plot_n_drawdown(n, df_drawdown, df_n_drawdowns)
-        return df_n_drawdowns
+        df_n_drawdown_period = (
+            pd.DataFrame(self.drawdowns)
+            .sort_values(by="drawdown_period", ascending=False)
+            .reset_index(drop=True)
+            .iloc[:n]
+        )
+        print("-------------------")
+        print(f"{n}-highest drawdown")
+        print(df_n_drawdowns)
+        print("\n")
+
+        print("-------------------")
+        print(f"{n}-highest drawdown period")
+        print(df_n_drawdown_period)
+        self._plot_n_drawdown(n, df_drawdown, df_n_drawdowns) if is_plot else None
 
     def _plot_n_drawdown(
         self, n: int, df_drawdown: pd.DataFrame, df_n_drawdowns: pd.DataFrame
     ):
         _, ax = plt.subplots(1, figsize=(16, 10))
+        ax.set_title(self.symbol)
         df_drawdown[["Cumulative Returns"]].plot(color="green", ax=ax)
         df_drawdown[["Watermark"]].plot(color="blue", ls="--", ax=ax, label="Watermark")
 

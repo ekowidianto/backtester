@@ -12,13 +12,14 @@ class Portfolio:
         self.df_prices = df_prices.copy(deep=True).reset_index()
         self.capital = capital
         self.transaction_fee = transaction_fee
+        self.symbol = self.df_prices["Tickers"].iloc[0]
 
         self.df_portfolio = self.init_portfolio()
 
     def get_performance(self) -> PerformanceCustom:
         df = self.df_portfolio[["Date", "strategy_cum_net_returns"]].copy()
         df.columns = ["Date", "Cumulative Returns"]
-        return PerformanceCustom(df)
+        return PerformanceCustom(df, self.symbol)
 
     def get_portfolio(self) -> pd.DataFrame:
         return self.df_portfolio
