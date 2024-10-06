@@ -98,7 +98,7 @@ class PerformanceCustom:
         avg_daily_return = daily_return.mean()
         std_daily_return = daily_return.std()
         sharpe_ratio = np.sqrt(252) * avg_daily_return / std_daily_return
-        return sharpe_ratio
+        return np.round(sharpe_ratio, 3)
 
     def compute_annual_returns(self) -> pd.DataFrame:
         unique_years = self.cumulative_returns.index.year.unique()
