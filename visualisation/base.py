@@ -119,3 +119,19 @@ def plot_sma_mean_reversion_buy_sell(symbol, df_prices: pd.DataFrame):
         label="Price - SMA Diff",
     )
     sub.legend()
+
+
+def plot_lag(symbol, df_prices):
+    df_prices = df_prices.reset_index()
+
+    fig, sub = plot_buy_sell(symbol, df_prices)
+
+    sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"Trading Position")
+    sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
+    sub.plot(
+        df_prices["Date"],
+        df_prices["trading_positions"],
+        color="red",
+        label="Trading Positions",
+    )
+    sub.legend()

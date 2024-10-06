@@ -3,6 +3,7 @@ from typing import Literal
 
 import pandas as pd
 from indicators import (
+    Indicator_Lag,
     Indicator_MA_Crossover,
     Indicator_MACD,
     Indicator_SMA_Mean_Reversion,
@@ -15,6 +16,7 @@ class Signals:
         "MACD": Indicator_MACD,
         "MA_crossover": Indicator_MA_Crossover,
         "SMA_mean_reversion": Indicator_SMA_Mean_Reversion,
+        "Lag": Indicator_Lag,
     }
 
     def __init__(self, symbol: str, sd: datetime, ed: datetime, lookback: int = 0):
@@ -39,7 +41,7 @@ class Signals:
 
     def run_indicator_for(
         self,
-        indicator: Literal["MACD", "MA_Crossover", "SMA_mean_reversion"],
+        indicator: Literal["MACD", "MA_Crossover", "SMA_mean_reversion", "Lag"],
         **indicator_params
     ) -> pd.DataFrame:
         indicator = self.IndicatorMap[indicator](
@@ -49,5 +51,7 @@ class Signals:
         self.data_with_indicator[indicator] = indicator
         return self.data_with_indicator[indicator]
 
-    def get_indicator_for(self, indicator: Literal["MACD"]) -> pd.DataFrame:
+    def get_indicator_for(
+        self, indicator: Literal["MACD", "MA_Crossover", "SMA_mean_reversion", "Lag"]
+    ) -> pd.DataFrame:
         return self.data_with_indicator.get(indicator, None)
