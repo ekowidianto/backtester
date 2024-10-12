@@ -86,9 +86,9 @@ class Indicator_SMA_Mean_Reversion(Indicator):
                 self.price_data["trading_positions"],
             )
         )
-        self.price_data["trading_positions"] = (
-            self.price_data["trading_positions"].ffill().fillna(0)
-        )
+        self.price_data["trading_positions"] = self.price_data[
+            "trading_positions"
+        ].ffill()
 
     def _compute_buy_or_sell(self):
         self.price_data["buy_or_sell"] = (
