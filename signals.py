@@ -6,6 +6,7 @@ from indicators import (
     Indicator_Lag,
     Indicator_MA_Crossover,
     Indicator_MACD,
+    Indicator_RSI,
     Indicator_Simple_Momentum,
     Indicator_SMA_Mean_Reversion,
 )
@@ -19,6 +20,7 @@ class Signals:
         "SMA_mean_reversion": Indicator_SMA_Mean_Reversion,
         "Lag": Indicator_Lag,
         "Simple_momentum": Indicator_Simple_Momentum,
+        "RSI": Indicator_RSI,
     }
 
     def __init__(self, symbol: str, sd: datetime, ed: datetime, lookback: int = 0):
@@ -44,7 +46,12 @@ class Signals:
     def run_indicator_for(
         self,
         indicator: Literal[
-            "MACD", "MA_crossover", "SMA_mean_reversion", "Lag", "Simple_momentum"
+            "MACD",
+            "MA_crossover",
+            "SMA_mean_reversion",
+            "Lag",
+            "Simple_momentum",
+            "RSI",
         ],
         **indicator_params
     ) -> pd.DataFrame:
@@ -58,7 +65,12 @@ class Signals:
     def get_indicator_for(
         self,
         indicator: Literal[
-            "MACD", "MA_crossover", "SMA_mean_reversion", "Lag", "Simple_momentum"
+            "MACD",
+            "MA_crossover",
+            "SMA_mean_reversion",
+            "Lag",
+            "Simple_momentum",
+            "RSI",
         ],
     ) -> pd.DataFrame:
         return self.data_with_indicator.get(indicator, None)

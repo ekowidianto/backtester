@@ -151,3 +151,22 @@ def plot_simple_momentum(symbol, df_prices):
         label="Trading Positions",
     )
     sub.legend()
+
+
+def plot_rsi_buy_sell(
+    symbol,
+    df_prices: pd.DataFrame,
+):
+    df_prices = df_prices.reset_index()
+
+    fig, _ = plot_buy_sell(symbol, df_prices)
+    sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"RSI")
+    sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
+    sub.plot(df_prices["Date"], df_prices["RSI"], linewidth=0.75, label="RSI")
+    sub.plot(
+        df_prices["Date"], df_prices["RSI_lower_threshold"], color="g", linestyle="--"
+    )
+    sub.plot(
+        df_prices["Date"], df_prices["RSI_upper_threshold"], color="r", linestyle="--"
+    )
+    sub.legend()

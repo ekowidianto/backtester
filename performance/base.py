@@ -87,9 +87,7 @@ class PerformanceCustom:
         ax.legend()
         plt.show()
 
-    def compute_sharpe_ratio(
-        self, method: Literal["log", "pct_chg"] = "pct_chg"
-    ) -> float:
+    def compute_sharpe_ratio(self, method: Literal["log", "pct_chg"] = "log") -> float:
         pct_chg_daily_return = self.cumulative_returns[
             "Cumulative Returns"
         ].pct_change()
