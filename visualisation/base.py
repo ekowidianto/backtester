@@ -46,7 +46,6 @@ def plot_buy_sell(symbol, df_prices: pd.DataFrame):
 
 def plot_macd_buy_sell(symbol, df_prices: pd.DataFrame):
     df_prices = df_prices.reset_index()
-
     fig, _ = plot_buy_sell(symbol, df_prices)
     sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"MACD")
     sub.set_xlim(df_prices["Date"].min(), df_prices["Date"].max())
@@ -115,8 +114,23 @@ def plot_sma_mean_reversion_buy_sell(symbol, df_prices: pd.DataFrame):
     sub.plot(
         df_prices["Date"],
         df_prices["SMA_Price_Diff"],
-        color="red",
+        color="grey",
         label="Price - SMA Diff",
+    )
+
+    buy_positions = df_prices[df_prices["buy_or_sell"] == 1]
+    sell_positions = df_prices[df_prices["buy_or_sell"] == -1]
+    sub.scatter(
+        buy_positions["Date"],
+        buy_positions["buy_or_sell"],
+        c="r",
+        alpha=0.3,
+    )
+    sub.scatter(
+        sell_positions["Date"],
+        sell_positions["buy_or_sell"],
+        c="b",
+        alpha=0.3,
     )
     sub.legend()
 

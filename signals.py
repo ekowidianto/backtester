@@ -27,13 +27,14 @@ class Signals:
         self.symbol = symbol
         self.sd = sd
         self.ed = ed
-        self.dates = pd.date_range(sd, ed)
-        self.dates_with_lookback = pd.date_range(sd - timedelta(days=lookback), ed)
+        self.lookback = lookback
         self.data = self.get_data()
         self.data_with_indicator = {}
 
     def get_data(self) -> pd.DataFrame:
-        all_data = get_data([self.symbol], self.sd, self.ed)
+        all_data = get_data(
+            [self.symbol], self.sd - timedelta(days=self.lookback), self.ed
+        )
         all_data = all_data.ffill().bfill()
 
         all_data["Adj Ratio"] = all_data["Adj Close"] / all_data["Close"]
@@ -56,7 +57,7 @@ class Signals:
         **indicator_params
     ) -> pd.DataFrame:
         indicator = self.IndicatorMap[indicator](
-            self.symbol, self.data, **indicator_params
+            self.symbol, self.data, **indicator_params, start_date=self.sd
         )
         indicator.run()
         self.data_with_indicator[indicator] = indicator

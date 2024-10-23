@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 
@@ -12,11 +14,12 @@ class Indicator_MACD(Indicator):
         self,
         symbol: str,
         price_data: pd.DataFrame,
+        start_date: datetime,
         short_period: int = 12,
         long_period: int = 26,
         signal_period: int = 9,
     ):
-        super().__init__(price_data)
+        super().__init__(price_data, start_date)
         self.symbol = symbol
         self.price_data = price_data
         self.short_period = short_period

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 
@@ -11,9 +13,10 @@ class Indicator_Lag(Indicator):
         self,
         symbol: str,
         price_data: pd.DataFrame,
+        start_date: datetime,
         lag_days: int = 2,
     ):
-        super().__init__(price_data)
+        super().__init__(price_data, start_date)
         self.symbol = symbol
         self.price_data = price_data
         self.lag_days = lag_days

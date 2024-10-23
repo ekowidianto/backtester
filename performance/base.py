@@ -111,7 +111,16 @@ class PerformanceCustom:
                 - 1
             )
             annual_returns.append(val * 100)
-        return pd.DataFrame({"Year": unique_years, "Annual Return (%)": annual_returns})
+        mean_return = np.mean(annual_returns)
+        df = pd.DataFrame({"Year": unique_years, "Annual Return (%)": annual_returns})
+        year_above_average = df[df["Annual Return (%)"] > mean_return]["Year"].values
+        year_below_average = df[df["Annual Return (%)"] < mean_return]["Year"].values
+
+        print(f"Mean annual return: {mean_return:.2f}%")
+        print(f"Years above average: {year_above_average}")
+        print(f"Years below average: {year_below_average}")
+
+        return df
 
     def compute_cagr(self) -> float:
         cumulative_returns = self.cumulative_returns["Cumulative Returns"]

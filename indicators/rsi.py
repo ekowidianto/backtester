@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 import numpy as np
 import pandas as pd
 
@@ -12,18 +15,29 @@ class Indicator_RSI(Indicator):
         self,
         symbol: str,
         price_data: pd.DataFrame,
+        start_date: datetime,
         period: int = 14,
         lower_threshold: float = 30,
+        long_when: Literal[
+            "crossed_above_lower_threshold",
+            "crossed_below_lower_threshold",
+        ] = "crossed_above_lower_threshold",
         upper_threshold: float = 70,
-        long_threshold_exit: float = 50,
-        short_threshold_exit: float = 50,
+        short_when: Literal[
+            "crossed_above_upper_threshold",
+            "crossed_below_upper_threshold",
+        ] = "crossed_below_upper_threshold",
+        long_threshold_exit: float = None,
+        short_threshold_exit: float = None,
     ):
-        super().__init__(price_data)
+        super().__init__(price_data, start_date)
         self.symbol = symbol
         self.price_data = price_data
         self.period = period
         self.price_data["RSI_lower_threshold"] = lower_threshold
         self.price_data["RSI_upper_threshold"] = upper_threshold
+        self.long_when = long_when
+        self.short_when = short_when
         self.long_threshold_exit = long_threshold_exit
         self.short_threshold_exit = short_threshold_exit
 
@@ -56,32 +70,44 @@ class Indicator_RSI(Indicator):
         self.price_data["RSI"] = rsi
 
     def _compute_trading_positions(self):
-        buy_signal = crossed_above(
-            self.price_data["RSI"], self.price_data["RSI_lower_threshold"]
-        )
-        sell_signal = crossed_below(
-            self.price_data["RSI"], self.price_data["RSI_upper_threshold"]
-        )
+        if self.long_when == "crossed_above_lower_threshold":
+            buy_signal = crossed_above(
+                self.price_data["RSI"], self.price_data["RSI_lower_threshold"]
+            )
+        else:
+            buy_signal = crossed_below(
+                self.price_data["RSI"], self.price_data["RSI_lower_threshold"]
+            )
+
+        if self.short_when == "crossed_below_upper_threshold":
+            sell_signal = crossed_below(
+                self.price_data["RSI"], self.price_data["RSI_upper_threshold"]
+            )
+        else:
+            sell_signal = crossed_above(
+                self.price_data["RSI"], self.price_data["RSI_upper_threshold"]
+            )
 
         self.price_data["trading_positions"] = np.where(buy_signal, 1, np.nan)
         self.price_data["trading_positions"] = np.where(
             sell_signal, -1, self.price_data["trading_positions"]
         )
-        self.price_data["trading_positions"] = np.where(
-            (
-                (self.price_data["RSI"] - self.long_threshold_exit)
-                * (self.price_data["RSI"].shift(1) - self.long_threshold_exit)
-                < 0
-            ),
-            0,
-            self.price_data["trading_positions"],
+        if (
+            self.long_threshold_exit is not None
+            or self.short_threshold_exit is not None
+        ):
+            self.price_data["trading_positions"] = np.where(
+                (
+                    (self.price_data["RSI"] - self.long_threshold_exit)
+                    * (self.price_data["RSI"].shift(1) - self.long_threshold_exit)
+                    < 0
+                ),
+                0,
+                self.price_data["trading_positions"],
+            )
+        self.price_data["trading_positions"] = (
+            self.price_data["trading_positions"].ffill().fillna(0)
         )
-        self.price_data["trading_positions"] = self.price_data[
-            "trading_positions"
-        ].ffill()
-        self.price_data["trading_positions"] = self.price_data[
-            "trading_positions"
-        ].fillna(0)
 
     def _compute_buy_or_sell(self):
         self.price_data["buy_or_sell"] = (

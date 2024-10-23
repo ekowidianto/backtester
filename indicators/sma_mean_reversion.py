@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 import numpy as np
@@ -14,11 +15,12 @@ class Indicator_SMA_Mean_Reversion(Indicator):
         self,
         symbol: str,
         price_data: pd.DataFrame,
+        start_date: datetime,
         sma_period: int = 41,
         threshold_method: Literal["constant", "stdev"] = "constant",
         threshold_multiplier: float = 4.0,
     ):
-        super().__init__(price_data)
+        super().__init__(price_data, start_date)
         self.symbol = symbol
         self.price_data = price_data
         self.sma_period = sma_period
@@ -93,4 +95,4 @@ class Indicator_SMA_Mean_Reversion(Indicator):
     def _compute_buy_or_sell(self):
         self.price_data["buy_or_sell"] = (
             self.price_data["trading_positions"].diff().clip(-1, 1)
-        )
+        ).fillna(0)

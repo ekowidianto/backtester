@@ -76,7 +76,40 @@ class Portfolio:
         df_portfolio = self.df_portfolio.reset_index()
         fig = plt.figure(figsize=[16, 12])
 
-        sub = fig.add_subplot(3, 1, (1, 2), xlabel="Date", ylabel=f"Cumulative Returns")
+        sub = fig.add_subplot(5, 1, (1, 2), xlabel="Date", ylabel=f"Cumulative Returns")
+        sub.set_title(self.symbol)
+        sub.set_xlim(df_portfolio["Date"].min(), df_portfolio["Date"].max())
+        sub.plot(
+            df_portfolio["Date"],
+            df_portfolio["Adj Close"],
+            color="grey",
+            linewidth=0.75,
+            label="Adj Close Price",
+        )
+        # BUY signal
+        buy_index = df_portfolio.buy_or_sell == 1.0
+        sub.plot(
+            df_portfolio.loc[buy_index]["Date"],
+            df_portfolio[buy_index]["Adj Close"],
+            "^",
+            color="green",
+            markersize=4,
+            label="Buy",
+        )
+
+        # SELL signal
+        sell_index = df_portfolio.buy_or_sell == -1.0
+        sub.plot(
+            df_portfolio.loc[sell_index]["Date"],
+            df_portfolio[sell_index]["Adj Close"],
+            "v",
+            color="red",
+            markersize=4,
+            label="Sell",
+        )
+        sub.legend()
+
+        sub = fig.add_subplot(5, 1, (3, 4), xlabel="Date", ylabel=f"Cumulative Returns")
         sub.set_xlim(df_portfolio["Date"].min(), df_portfolio["Date"].max())
         sub.plot(
             df_portfolio["Date"],
@@ -99,9 +132,8 @@ class Portfolio:
             linewidth=0.75,
             label=strat_label,
         )
-        sub.legend()
 
-        sub = fig.add_subplot(3, 1, 3, xlabel="Date", ylabel=f"Positions")
+        sub = fig.add_subplot(5, 1, 5, xlabel="Date", ylabel=f"Positions")
         sub.set_xlim(df_portfolio["Date"].min(), df_portfolio["Date"].max())
         sub.plot(
             df_portfolio["Date"],
@@ -114,4 +146,9 @@ class Portfolio:
         return np.log(daily_price_data / daily_price_data.shift(1))
 
     def _compute_cum_returns(self, daily_log_returns: pd.Series) -> pd.Series:
-        return daily_log_returns.cumsum().apply(np.exp)
+        return daily_log_returns.fillna(0).cumsum().apply(np.exp)
+
+    def compute_trading_opportunities(self) -> float:
+        return self.get_portfolio[
+            ~self.get_portfolio["trading_positions"].isna()
+        ].shape[0]
