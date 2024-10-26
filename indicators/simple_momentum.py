@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -14,8 +15,9 @@ class Indicator_Simple_Momentum(Indicator):
         symbol: str,
         price_data: pd.DataFrame,
         start_date: datetime,
+        position_type: Literal["long", "short", "long_short"] = "long_short",
     ):
-        super().__init__(price_data, start_date)
+        super().__init__(price_data, start_date, position_type)
         self.symbol = symbol
         self.price_data = price_data
 
@@ -34,8 +36,9 @@ class Indicator_Simple_Momentum(Indicator):
 
     def _compute_trading_positions(self):
         self.price_data["trading_positions"] = np.sign(self.price_data["Log Return"])
+        super()._compute_trading_positions()
 
     def _compute_buy_or_sell(self):
         self.price_data["buy_or_sell"] = (
             self.price_data["trading_positions"].diff().clip(-1, 1)
-        )
+        ).fillna(0)

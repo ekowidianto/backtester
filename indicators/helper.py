@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def compute_sma(df: pd.DataFrame, period: int) -> pd.DataFrame:
-    return df.rolling(period).mean()
+    return df.rolling(period, min_periods=1, center=False).mean()
 
 
 def compute_ema(df: pd.DataFrame, period: int) -> pd.DataFrame:

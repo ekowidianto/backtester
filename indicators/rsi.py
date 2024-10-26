@@ -7,7 +7,7 @@ import pandas as pd
 from lib.visualisation import plot_rsi_buy_sell
 
 from .base import Indicator
-from .helper import compute_sma, crossed_above, crossed_below
+from .helper import crossed_above, crossed_below
 
 
 class Indicator_RSI(Indicator):
@@ -16,6 +16,7 @@ class Indicator_RSI(Indicator):
         symbol: str,
         price_data: pd.DataFrame,
         start_date: datetime,
+        position_type: Literal["long", "short", "long_short"] = "long_short",
         period: int = 14,
         lower_threshold: float = 30,
         long_when: Literal[
@@ -30,7 +31,7 @@ class Indicator_RSI(Indicator):
         long_threshold_exit: float = None,
         short_threshold_exit: float = None,
     ):
-        super().__init__(price_data, start_date)
+        super().__init__(price_data, start_date, position_type)
         self.symbol = symbol
         self.price_data = price_data
         self.period = period
@@ -59,8 +60,8 @@ class Indicator_RSI(Indicator):
         avg_gain = gain.rolling(window=self.period).mean()
         avg_loss = loss.rolling(window=self.period).mean()
         for i in range(self.period, len(delta)):
-            avg_gain[i] = (avg_gain[i - 1] * 13 + gain[i]) / self.period
-            avg_loss[i] = (avg_loss[i - 1] * 13 + loss[i]) / self.period
+            avg_gain[i] = (avg_gain[i - 1] * (self.period - 1) + gain[i]) / self.period
+            avg_loss[i] = (avg_loss[i - 1] * (self.period - 1) + loss[i]) / self.period
 
         # Compute the Relative Strength (RS)
         rs = avg_gain / avg_loss
@@ -108,8 +109,9 @@ class Indicator_RSI(Indicator):
         self.price_data["trading_positions"] = (
             self.price_data["trading_positions"].ffill().fillna(0)
         )
+        super()._compute_trading_positions()
 
     def _compute_buy_or_sell(self):
         self.price_data["buy_or_sell"] = (
             self.price_data["trading_positions"].diff().clip(-1, 1)
-        )
+        ).fillna(0)

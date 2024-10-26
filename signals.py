@@ -23,13 +23,21 @@ class Signals:
         "RSI": Indicator_RSI,
     }
 
-    def __init__(self, symbol: str, sd: datetime, ed: datetime, lookback: int = 0):
+    def __init__(
+        self,
+        symbol: str,
+        sd: datetime,
+        ed: datetime,
+        lookback: int = 0,
+        position_type: Literal["long", "short", "long_short"] = "long_short",
+    ):
         self.symbol = symbol
         self.sd = sd
         self.ed = ed
         self.lookback = lookback
         self.data = self.get_data()
         self.data_with_indicator = {}
+        self.position_type = position_type
 
     def get_data(self) -> pd.DataFrame:
         all_data = get_data(
@@ -57,7 +65,11 @@ class Signals:
         **indicator_params
     ) -> pd.DataFrame:
         indicator = self.IndicatorMap[indicator](
-            self.symbol, self.data, **indicator_params, start_date=self.sd
+            self.symbol,
+            self.data,
+            **indicator_params,
+            start_date=self.sd,
+            position_type=self.position_type
         )
         indicator.run()
         self.data_with_indicator[indicator] = indicator

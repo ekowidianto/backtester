@@ -66,6 +66,7 @@ class PerformanceCustom:
         print(f"{n}-highest drawdown period")
         print(df_n_drawdown_period)
         self._plot_n_drawdown(n, df_drawdown, df_n_drawdowns) if is_plot else None
+        return df_n_drawdowns, df_n_drawdown_period
 
     def _plot_n_drawdown(
         self, n: int, df_drawdown: pd.DataFrame, df_n_drawdowns: pd.DataFrame

@@ -1,14 +1,23 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Literal
 
 import numpy as np
 import pandas as pd
 
 
 class Indicator(ABC):
-    def __init__(self, price_data: pd.DataFrame, start_date: datetime):
+    def __init__(
+        self,
+        price_data: pd.DataFrame,
+        start_date: datetime,
+        position_type: Literal["long", "short", "long_short"] = "long_short",
+    ):
         self.price_data = price_data.copy(deep=True)
         self.start_date = start_date
+        self.position_type = position_type
+        self.long = 1 if position_type in ["long", "long_short"] else 0
+        self.short = -1 if position_type in ["short", "long_short"] else 0
 
     def get_price_data(self) -> pd.DataFrame:
         df = self.price_data.copy(deep=True)
@@ -28,15 +37,16 @@ class Indicator(ABC):
         pass
 
     @abstractmethod
-    def _compute_internal_workings(self) -> pd.DataFrame:
+    def _compute_internal_workings(self):
         pass
 
-    @abstractmethod
-    def _compute_trading_positions(self) -> pd.DataFrame:
-        pass
+    def _compute_trading_positions(self):
+        self.price_data["trading_positions"] = self.price_data[
+            "trading_positions"
+        ].clip(self.short, self.long)
 
     @abstractmethod
-    def _compute_buy_or_sell(self) -> pd.DataFrame:
+    def _compute_buy_or_sell(self):
         pass
 
 

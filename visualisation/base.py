@@ -26,7 +26,7 @@ def plot_buy_sell(symbol, df_prices: pd.DataFrame):
         df_prices[buy_index]["Adj Close"],
         "^",
         color="green",
-        markersize=4,
+        markersize=6,
         label="Buy",
     )
 
@@ -37,7 +37,7 @@ def plot_buy_sell(symbol, df_prices: pd.DataFrame):
         df_prices[sell_index]["Adj Close"],
         "v",
         color="red",
-        markersize=4,
+        markersize=6,
         label="Sell",
     )
     sub.legend()
@@ -70,6 +70,7 @@ def plot_ma_crossover_buy_sell(symbol, df_prices):
         color="blue",
         ls="--",
         label="SMA Short",
+        linewidth=0.80,
     )
     sub.plot(
         df_prices["Date"],
@@ -77,6 +78,7 @@ def plot_ma_crossover_buy_sell(symbol, df_prices):
         color="green",
         ls="--",
         label="SMA Long",
+        linewidth=0.80,
     )
     sub.legend()
 

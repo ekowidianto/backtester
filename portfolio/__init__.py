@@ -1,3 +1,3 @@
-from .base import Portfolio
+from .base import Portfolio, PortfolioUpdated
 
-__all__ = ["Portfolio"]
+__all__ = ["Portfolio", "PortfolioUpdated"]

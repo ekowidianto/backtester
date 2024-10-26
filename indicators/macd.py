@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -15,11 +16,12 @@ class Indicator_MACD(Indicator):
         symbol: str,
         price_data: pd.DataFrame,
         start_date: datetime,
+        position_type: Literal["long", "short", "long_short"] = "long_short",
         short_period: int = 12,
         long_period: int = 26,
         signal_period: int = 9,
     ):
-        super().__init__(price_data, start_date)
+        super().__init__(price_data, start_date, position_type)
         self.symbol = symbol
         self.price_data = price_data
         self.short_period = short_period
@@ -30,7 +32,6 @@ class Indicator_MACD(Indicator):
         self._compute_internal_workings()
         self._compute_buy_or_sell()
         self._compute_trading_positions()
-        return self.price_data.copy(deep=True)
 
     def plot(self):
         plot_macd_buy_sell(self.symbol, self.get_price_data())
@@ -51,6 +52,7 @@ class Indicator_MACD(Indicator):
             self.price_data["buy_or_sell"].ffill().fillna(0)
         )
         self.price_data["buy_or_sell"] = self.price_data["buy_or_sell"].fillna(0)
+        super()._compute_trading_positions()
 
     def _compute_buy_or_sell(self):
         buy_signal = crossed_above(

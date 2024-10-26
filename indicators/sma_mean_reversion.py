@@ -16,11 +16,12 @@ class Indicator_SMA_Mean_Reversion(Indicator):
         symbol: str,
         price_data: pd.DataFrame,
         start_date: datetime,
+        position_type: Literal["long", "short", "long_short"] = "long_short",
         sma_period: int = 41,
         threshold_method: Literal["constant", "stdev"] = "constant",
         threshold_multiplier: float = 4.0,
     ):
-        super().__init__(price_data, start_date)
+        super().__init__(price_data, start_date, position_type)
         self.symbol = symbol
         self.price_data = price_data
         self.sma_period = sma_period
@@ -65,14 +66,14 @@ class Indicator_SMA_Mean_Reversion(Indicator):
 
         self.price_data["trading_positions"] = np.where(
             self.price_data["SMA_Price_Diff"] > self.price_data["Upper_Threshold"],
-            -1,
+            self.short,
             np.nan,  # overbought --> sell (short)
         )
 
         self.price_data["trading_positions"] = np.where(
             self.price_data["SMA_Price_Diff"]
             < self.price_data["Lower_Threshold"],  # oversold --> buy (long)
-            1,
+            self.long,
             self.price_data["trading_positions"],
         )
 
@@ -88,9 +89,10 @@ class Indicator_SMA_Mean_Reversion(Indicator):
                 self.price_data["trading_positions"],
             )
         )
-        self.price_data["trading_positions"] = self.price_data[
-            "trading_positions"
-        ].ffill()
+        self.price_data["trading_positions"] = (
+            self.price_data["trading_positions"].ffill().fillna(0)
+        )
+        super()._compute_trading_positions()
 
     def _compute_buy_or_sell(self):
         self.price_data["buy_or_sell"] = (
