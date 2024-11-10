@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import PercentFormatter
 
 from lib.performance import PerformanceCustom
 
@@ -69,16 +70,16 @@ class Portfolio:
         cumret_dict = {
             "Type": ["Passive", "Strategy", "Strategy with Fee"],
             "Cum Ret": [
-                final_row["cum_returns"],
-                final_row["strategy_cum_returns"],
-                final_row["strategy_cum_net_returns"],
+                final_row["cum_returns"] - 1,
+                final_row["strategy_cum_returns"] - 1,
+                final_row["strategy_cum_net_returns"] - 1,
             ],
         }
         return pd.DataFrame(cumret_dict)
 
     def plot_returns(self, with_fee: bool = True):
         df_portfolio = self.df_portfolio.reset_index()
-        fig = plt.figure(figsize=[16, 12])
+        fig = plt.figure(figsize=[14, 10])
 
         sub = fig.add_subplot(5, 1, (1, 2), xlabel="Date", ylabel=f"Adj Close")
         sub.set_title(self.symbol)
@@ -117,7 +118,7 @@ class Portfolio:
         sub.set_xlim(df_portfolio["Date"].min(), df_portfolio["Date"].max())
         sub.plot(
             df_portfolio["Date"],
-            df_portfolio["cum_returns"],
+            df_portfolio["cum_returns"] - 1,
             color="grey",
             linewidth=0.75,
             label="Passive",
@@ -131,11 +132,12 @@ class Portfolio:
         strat_label = "Strategy Return with Fee" if with_fee else "Strategy Return"
         sub.plot(
             df_portfolio["Date"],
-            strat_cum_ret,
+            strat_cum_ret - 1,
             color="blue",
             linewidth=0.75,
             label=strat_label,
         )
+        sub.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))
         sub.legend()
 
         sub = fig.add_subplot(5, 1, 5, xlabel="Date", ylabel=f"Positions")
@@ -184,9 +186,7 @@ class PortfolioUpdated(Portfolio):
 
         df_portfolio["position"] = self.num_shares * df_portfolio[
             "trading_positions"
-        ].shift(
-            0
-        )  # TODO: Change to 1
+        ].shift(1)
         df_portfolio["diff_shares_owned"] = (
             self.num_shares * df_portfolio["trading_positions"].diff()
         ).fillna(0)
@@ -219,7 +219,7 @@ class PortfolioUpdated(Portfolio):
 
     def plot_returns(self, with_fee: bool = True):
         df_portfolio = self.df_portfolio.reset_index()
-        fig = plt.figure(figsize=[16, 12])
+        fig = plt.figure(figsize=[14, 10])
 
         sub = fig.add_subplot(5, 1, (1, 2), xlabel="Date", ylabel=f"Adj Close")
         sub.set_title(self.symbol)
@@ -254,7 +254,9 @@ class PortfolioUpdated(Portfolio):
         )
         sub.legend()
 
-        sub = fig.add_subplot(5, 1, (3, 4), xlabel="Date", ylabel=f"Value of Portfolio (USD)")
+        sub = fig.add_subplot(
+            5, 1, (3, 4), xlabel="Date", ylabel=f"Value of Portfolio (USD)"
+        )
         sub.set_xlim(df_portfolio["Date"].min(), df_portfolio["Date"].max())
 
         strat_total_values = (

@@ -4,6 +4,7 @@ from typing import Literal
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import PercentFormatter
 
 
 class PerformanceCustom:
@@ -14,6 +15,7 @@ class PerformanceCustom:
 
     def compute_n_largest_drawdowns(self, n: int = 5, is_plot: bool = False):
         df_drawdown = self.cumulative_returns.copy()
+        df_drawdown["Cumulative Returns"] = df_drawdown["Cumulative Returns"] - 1
         df_drawdown["Watermark"] = df_drawdown["Cumulative Returns"].cummax()
         df_drawdown["drawdown"] = (
             df_drawdown["Watermark"] - df_drawdown["Cumulative Returns"]
@@ -60,13 +62,15 @@ class PerformanceCustom:
         print("-------------------")
         print(f"{n}-highest drawdown")
         print(df_n_drawdowns)
+        self._plot_n_drawdown(n, df_drawdown, df_n_drawdowns) if is_plot else None
         print("\n")
 
         print("-------------------")
         print(f"{n}-highest drawdown period")
         print(df_n_drawdown_period)
-        self._plot_n_drawdown(n, df_drawdown, df_n_drawdowns) if is_plot else None
-        return df_n_drawdowns, df_n_drawdown_period
+        self._plot_n_drawdown(n, df_drawdown, df_n_drawdown_period) if is_plot else None
+
+        return df_n_drawdowns, df_n_drawdown_period, df_drawdown
 
     def _plot_n_drawdown(
         self, n: int, df_drawdown: pd.DataFrame, df_n_drawdowns: pd.DataFrame
@@ -84,7 +88,7 @@ class PerformanceCustom:
             df_drawdown.loc[start:end]["Watermark"].plot(
                 ax=ax, label=f"Drawdown period = {days} days"
             )
-
+        ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))
         ax.legend()
         plt.show()
 
@@ -96,7 +100,11 @@ class PerformanceCustom:
         daily_return = pct_chg_daily_return if method == "pct_chg" else log_daily_return
         avg_daily_return = daily_return.mean()
         std_daily_return = daily_return.std()
-        sharpe_ratio = np.sqrt(252) * avg_daily_return / std_daily_return
+        sharpe_ratio = (
+            np.sqrt(252 / len(pct_chg_daily_return))
+            * avg_daily_return
+            / std_daily_return
+        )
         return np.round(sharpe_ratio, 3)
 
     def compute_annual_returns(self) -> pd.DataFrame:
@@ -150,7 +158,11 @@ class Performance:
         daily_returns = (
             self.daily_log_returns if method == "log" else self.daily_pct_returns
         )
-        return np.sqrt(252) * daily_returns.mean() / daily_returns.std()
+        return (
+            np.sqrt(252 / len(daily_returns))
+            * daily_returns.mean()
+            / daily_returns.std()
+        )
 
     def compute_cagr(self) -> float:
         cumulative_returns = self.cumulative_returns.dropna()

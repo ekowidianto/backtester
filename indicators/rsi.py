@@ -68,6 +68,9 @@ class Indicator_RSI(Indicator):
 
         # Compute the RSI
         rsi = 100 - (100 / (1 + rs))
+        self.price_data["avg_gain"] = avg_gain
+        self.price_data["avg_loss"] = avg_loss
+        self.price_data["rs"] = rs
         self.price_data["RSI"] = rsi
 
     def _compute_trading_positions(self):

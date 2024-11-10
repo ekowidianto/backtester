@@ -4,7 +4,7 @@ import pandas as pd
 
 def plot_buy_sell(symbol, df_prices: pd.DataFrame):
     df_prices = df_prices.reset_index()
-    fig = plt.figure(figsize=[16, 12])
+    fig = plt.figure(figsize=[14, 10])
 
     sub = fig.add_subplot(3, 1, (1, 2), xlabel="Date", ylabel=f"{symbol} Price")
 

@@ -97,7 +97,7 @@ class IndicatorsCombined:
         df["trading_positions"] = trading_positions
         df["trading_positions"].ffill(inplace=True)
         df["trading_positions"].fillna(0, inplace=True)
-        df["buy_or_sell"] = df["trading_positions"].diff()
+        df["buy_or_sell"] = df["trading_positions"].diff().clip(-1, 1)
         df["buy_or_sell"].fillna(0, inplace=True)
         self.price_data = df
 
